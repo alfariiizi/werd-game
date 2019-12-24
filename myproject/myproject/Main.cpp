@@ -3,7 +3,8 @@
 #include <string>
 #include <fstream>
 #include <random> //for randomize the index of the string
-#define MAXTEXTLINE 5754 //max text line 
+#include <cctype> //for lowering word
+#include <algorithm>
 
 bool HasUsed( std::vector<int>& seqOfIndexUsed, int index )
 {
@@ -33,24 +34,25 @@ int CheckMatch( std::string& input, std::string& dict )
 {
 	int score = 0;
 	std::vector<int> seqOfIndexUsed;
+
+	for( size_t i = 0; i < std::min<size_t>( input.size(), dict.size() ); i++ )
+	{
+		if( input[i] == dict[i] )
+		{
+			score += 2;
+			seqOfIndexUsed.push_back( i );
+		}
+	}
+
 	for( size_t i = 0; i < input.size(); i++ )
 	{
 		for( size_t j = 0; j < dict.size(); j++ )
 		{
-			if( !HasUsed( seqOfIndexUsed, j ) )
+			if( !HasUsed( seqOfIndexUsed, j ) && input[i] == dict[j] )
 			{
-				if( dict[j] == input[i] && i == j )
-				{
-					score += 20;
-					seqOfIndexUsed.push_back( j );
-					break;
-				}
-				else if( dict[j] == input[i] )
-				{
-					score += 10;
-					seqOfIndexUsed.push_back( j );
-					break;
-				}
+				score += 1;
+				seqOfIndexUsed.push_back( j );
+				break;
 			}
 		}
 	}
@@ -58,11 +60,20 @@ int CheckMatch( std::string& input, std::string& dict )
 	return score;
 }
 
-int main()
+void LoweringCase( std::string& s )
 {
-	std::mt19937 rng( std::random_device{}() );
-	std::uniform_int_distribution<int> dist( 0,MAXTEXTLINE - 1 );
-	std::ifstream in( "sgb-words.txt" );
+	for( char& c : s )
+	{
+		if( c >= 'A' && c <= 'Z' )
+		{
+			c = c + ( 'a' - 'A' );
+		}
+	}
+}
+
+int main()
+{;
+	std::ifstream in( "20k.txt" );
 	std::vector<std::string> seqOfLetter;
 	std::string buff;
 	std::string input;
@@ -72,29 +83,35 @@ int main()
 		std::getline( in, buff );
 		seqOfLetter.emplace_back( buff );
 	}
-	buff = seqOfLetter[ dist( rng ) ];
+	in.close();
 
-	std::cout << "Write 5 letter word" << std::endl;
+	std::mt19937 rng( std::random_device{}( ) );
+	std::uniform_int_distribution<int> dist( 0, seqOfLetter.size() - 1 );
+
+	buff = seqOfLetter[ dist( rng ) ];
+	const int sizeOfGuessingWord = buff.size();
+	bool ShowHint = true;
+
 	int score = 0;
-	while( score != 100 )
+	while( score != buff.size() * 2 )
 	{
 		std::cout << std::endl;
+		std::cout << "Write a word: ";
 		std::getline( std::cin,input );
-		if( input.size() != 5 )
+		LoweringCase( input );
+		if( input.size() != sizeOfGuessingWord && ShowHint )
 		{
-			std::cout << "I said 5 letter word" << std::endl;
+			std::cout << "Hint: It contain " << sizeOfGuessingWord << " letter" << std::endl;
+			ShowHint = false;
+		}
+		if( IsCorrectWord( seqOfLetter, input ) )
+		{
+			score = CheckMatch( input, buff );
+			std::cout << "Well, that's almost right, I give you: " << score << std::endl;
 		}
 		else
 		{
-			if( IsCorrectWord( seqOfLetter, input ) )
-			{
-				score = CheckMatch( input, buff );
-				std::cout << "Score: " << score << std::endl;
-			}
-			else
-			{
-				std::cout << "Incorrect word" << std::endl;
-			}
+			std::cout << input << " ? Are you sure that word is really exist ?" << std::endl;
 		}
 	}
 	std::cout << "Congratulation" << std::endl;
