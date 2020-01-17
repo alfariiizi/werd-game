@@ -86,7 +86,7 @@ int main()
 	in.close();
 
 	std::mt19937 rng( std::random_device{}( ) );
-	std::uniform_int_distribution<int> dist( 0, seqOfLetter.size() - 1 );
+	std::uniform_int_distribution<int> dist( 0, (seqOfLetter.size() / 20) - 1 ); //cuman ambil word pada line 0 sampai 999
 
 	buff = seqOfLetter[ dist( rng ) ];
 	const int sizeOfGuessingWord = buff.size();
