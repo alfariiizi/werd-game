@@ -86,14 +86,19 @@ int main()
 	in.close();
 
 	std::mt19937 rng( std::random_device{}( ) );
-	std::uniform_int_distribution<int> dist( 0, seqOfLetter.size() - 1 );
+	std::uniform_int_distribution<int> dist( 0, (seqOfLetter.size() / 20) - 1 ); //cuman ambil word pada line 0 sampai 999
 
-	buff = seqOfLetter[ dist( rng ) ];
+	do
+	{
+		buff = seqOfLetter[dist( rng )];
+	} while( buff.size() == 1 ); //tidak boleh hanya terdiri dari 1 huruf
+
 	const int sizeOfGuessingWord = buff.size();
 	bool ShowHint = true;
 
 	int score = 0;
-	while( score != buff.size() * 2 )
+	bool isAnswerFalse = true;
+	do
 	{
 		std::cout << std::endl;
 		std::cout << "Write a word: ";
@@ -107,13 +112,21 @@ int main()
 		if( IsCorrectWord( seqOfLetter, input ) )
 		{
 			score = CheckMatch( input, buff );
-			std::cout << "Well, that's almost right, I give you: " << score << std::endl;
+			isAnswerFalse = score != ( buff.size() * 2 );
+			if( isAnswerFalse && score > 0 )
+			{
+				std::cout << "Well, that's almost right, I give you: " << score << std::endl;
+			}
+			else if( score == 0 )
+			{
+				std::cout << "Sorry, but " << "\"" << input << "\"" << " is totally wrong" << std::endl;
+			}
 		}
 		else
 		{
-			std::cout << input << " ? Are you sure that word is really exist ?" << std::endl;
+			std::cout << input << "? Are you sure that word is really exist?" << std::endl;
 		}
-	}
+	} while( isAnswerFalse );
 	std::cout << "Congratulation" << std::endl;
 
 	return 0;
