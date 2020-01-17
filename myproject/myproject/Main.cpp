@@ -93,7 +93,8 @@ int main()
 	bool ShowHint = true;
 
 	int score = 0;
-	while( score != buff.size() * 2 )
+	bool isAnswerFalse = true;
+	do
 	{
 		std::cout << std::endl;
 		std::cout << "Write a word: ";
@@ -107,13 +108,21 @@ int main()
 		if( IsCorrectWord( seqOfLetter, input ) )
 		{
 			score = CheckMatch( input, buff );
-			std::cout << "Well, that's almost right, I give you: " << score << std::endl;
+			isAnswerFalse = score != ( buff.size() * 2 );
+			if( isAnswerFalse && score > 0 )
+			{
+				std::cout << "Well, that's almost right, I give you: " << score << std::endl;
+			}
+			else if( score == 0 )
+			{
+				std::cout << "Sorry, but " << "\"" << input << "\"" << " is totally wrong" << std::endl;
+			}
 		}
 		else
 		{
-			std::cout << input << " ? Are you sure that word is really exist ?" << std::endl;
+			std::cout << input << "? Are you sure that word is really exist?" << std::endl;
 		}
-	}
+	} while( isAnswerFalse );
 	std::cout << "Congratulation" << std::endl;
 
 	return 0;
